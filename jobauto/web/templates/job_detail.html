@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}{{ job['title'] }} - JobAuto{% endblock %}
+{% block content %}
+
+<a href="/">&larr; back to jobs</a>
+
+<section class="panel">
+  <h2>{{ job['title'] }}</h2>
+  <p class="subtitle">{{ job['company'] }} &middot; {{ job['location'] }} &middot; <a href="{{ job['url'] }}" target="_blank">original posting ↗</a></p>
+
+  <form method="post" action="/job/{{ job['id'] }}/status" class="inline-form">
+    <label>Status:
+      <select name="status" onchange="this.form.submit()">
+        {% for s in statuses %}
+        <option value="{{ s }}" {% if job['status'] == s %}selected{% endif %}>{{ s }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </form>
+
+  <div class="actions">
+    <form method="post" action="/job/{{ job['id'] }}/generate">
+      <button type="submit">Generate tailored resume + cover letter</button>
+    </form>
+    {% if job['resume_pdf_path'] %}
+    <form method="post" action="/job/{{ job['id'] }}/apply">
+      <button type="submit" class="primary">Open application &amp; auto-fill (you review &amp; submit)</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if job['resume_pdf_path'] %}
+  <div class="downloads">
+    <a href="/job/{{ job['id'] }}/download/resume_pdf">Resume (PDF)</a>
+    <a href="/job/{{ job['id'] }}/download/resume_docx">Resume (DOCX)</a>
+    <a href="/job/{{ job['id'] }}/download/cover_letter_pdf">Cover letter (PDF)</a>
+  </div>
+  {% endif %}
+
+  <h3>Job description</h3>
+  <div class="description">{{ job['description'] }}</div>
+</section>
+
+{% endblock %}

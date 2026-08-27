@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}JobAuto - Jobs{% endblock %}
+{% block content %}
+
+<section class="panel">
+  <h2>Search for jobs</h2>
+  <form method="post" action="/search">
+    <div class="checkbox-grid">
+      {% for s in sources %}
+      <label><input type="checkbox" name="sources" value="{{ s }}" {% if s in ["greenhouse","lever","ashby","usajobs","adzuna"] %}checked{% endif %}> {{ s }}</label>
+      {% endfor %}
+    </div>
+    <button type="submit">Run search</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Add a job manually</h2>
+  <p class="subtitle">For postings you found yourself (e.g. on Handshake or Blind) - paste the link and details.</p>
+  <form method="post" action="/jobs/add" class="checkbox-grid">
+    <input type="url" name="url" placeholder="Job posting URL" required style="flex:2">
+    <input type="text" name="title" placeholder="Job title" required>
+    <input type="text" name="company" placeholder="Company" required>
+    <input type="text" name="location" placeholder="Location">
+    <button type="submit">Add</button>
+  </form>
+</section>
+
+<section class="panel">
+  <h2>Jobs ({{ jobs|length }})</h2>
+  <div class="filters">
+    <a href="/" class="{% if not active_status %}active{% endif %}">all</a>
+    {% for s in statuses %}
+      <a href="/?status={{ s }}" class="{% if active_status == s %}active{% endif %}">{{ s }}</a>
+    {% endfor %}
+  </div>
+  <table>
+    <thead><tr><th>Status</th><th>Title</th><th>Company</th><th>Location</th><th>Source</th><th></th></tr></thead>
+    <tbody>
+      {% for job in jobs %}
+      <tr>
+        <td><span class="badge status-{{ job['status'] }}">{{ job['status'] }}</span></td>
+        <td><a href="/job/{{ job['id'] }}">{{ job['title'] }}</a></td>
+        <td>{{ job['company'] }}</td>
+        <td>{{ job['location'] }}</td>
+        <td>{{ job['source'] }}</td>
+        <td><a href="{{ job['url'] }}" target="_blank">original ↗</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+{% endblock %}

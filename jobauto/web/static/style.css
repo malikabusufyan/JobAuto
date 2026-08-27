@@ -1,0 +1,30 @@
+* { box-sizing: border-box; }
+body { font-family: -apple-system, Segoe UI, Roboto, sans-serif; background: #f5f6f8; color: #1a1a1a; margin: 0; }
+header { background: #1a1a2e; padding: 14px 24px; }
+header .logo { color: #fff; font-weight: bold; font-size: 18px; text-decoration: none; }
+main { max-width: 960px; margin: 24px auto; padding: 0 16px; }
+.panel { background: #fff; border-radius: 8px; padding: 20px 24px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+h2 { margin-top: 0; }
+.subtitle { color: #666; }
+table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; font-size: 14px; }
+.badge { padding: 2px 8px; border-radius: 10px; font-size: 12px; background: #e0e0e0; }
+.status-generated { background: #cfe8ff; }
+.status-ready { background: #d4f7d4; }
+.status-applied { background: #c9f0d0; }
+.status-interview { background: #ffe6b3; }
+.status-offer { background: #b3ffcc; }
+.status-rejected { background: #ffd0d0; }
+.filters { margin-bottom: 6px; }
+.filters a { margin-right: 12px; text-decoration: none; color: #555; font-size: 13px; }
+.filters a.active { font-weight: bold; color: #1a1a2e; }
+.checkbox-grid { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+button { background: #1a1a2e; color: #fff; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-size: 14px; }
+button.primary { background: #2b6cb0; }
+button:hover { opacity: 0.9; }
+.actions { display: flex; gap: 10px; margin: 14px 0; flex-wrap: wrap; }
+.downloads { display: flex; gap: 16px; margin-bottom: 16px; }
+.description { white-space: pre-wrap; font-size: 14px; line-height: 1.5; color: #333; }
+.inline-form { margin-bottom: 8px; }
+select { padding: 4px 8px; }
+a { color: #2b6cb0; }

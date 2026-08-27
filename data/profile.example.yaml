@@ -1,0 +1,83 @@
+# Your master profile. Copy this file to profile.yaml and fill it in (or run
+# `python -m jobauto.cli parse-resume path/to/your_resume.pdf` to auto-draft it
+# from an existing resume, then review/edit the result by hand).
+#
+# Every application is tailored FROM this file - the more complete and honest
+# it is, the better the generated resumes/cover letters will be.
+
+personal:
+  full_name: "Jane Doe"
+  email: "jane.doe@example.com"
+  phone: "+1-555-123-4567"
+  location: "Austin, TX"
+  linkedin: "https://linkedin.com/in/janedoe"
+  github: "https://github.com/janedoe"
+  portfolio: ""
+  work_authorization: "US Citizen"   # e.g. US Citizen, Green Card, H1B, Requires Sponsorship, OPT/CPT
+  willing_to_relocate: false
+  willing_to_sponsor_needed: false   # true if YOU need visa sponsorship
+
+summary: >
+  Backend software engineer with 5 years of experience building high-throughput
+  distributed systems in Python and Go. Enjoys owning services end to end,
+  from design through on-call.
+
+skills:
+  - Python
+  - Go
+  - PostgreSQL
+  - Kubernetes
+  - AWS
+  - System Design
+
+experience:
+  - company: "Acme Corp"
+    title: "Senior Software Engineer"
+    location: "Remote"
+    start_date: "2022-03"
+    end_date: "Present"
+    bullets:
+      - "Led rewrite of the billing pipeline, cutting invoice processing latency by 60%."
+      - "Mentored 3 junior engineers; introduced code review standards adopted org-wide."
+  - company: "Startup Inc"
+    title: "Software Engineer"
+    location: "Austin, TX"
+    start_date: "2019-06"
+    end_date: "2022-02"
+    bullets:
+      - "Built the initial version of the customer-facing analytics dashboard (React + FastAPI)."
+      - "Reduced AWS spend by 30% through right-sizing and spot-instance adoption."
+
+education:
+  - institution: "University of Texas at Austin"
+    degree: "B.S."
+    field: "Computer Science"
+    start_date: "2015-08"
+    end_date: "2019-05"
+    gpa: ""
+
+projects: []
+
+certifications: []
+
+achievements: []   # awards, publications, etc. - shown on the resume and available to the cover letter writer
+
+preferences:
+  target_titles:
+    - "Software Engineer"
+    - "Backend Engineer"
+  target_locations:
+    - "Remote"
+    - "Austin, TX"
+  remote_ok: true
+  min_salary: 120000
+  target_companies:
+    # Company "board tokens"/slugs used to query Greenhouse/Lever/Ashby directly.
+    # Find them by opening a company's careers page and checking the URL:
+    #   boards.greenhouse.io/<token>       -> greenhouse
+    #   jobs.lever.co/<token>              -> lever
+    #   jobs.ashbyhq.com/<token>           -> ashby
+    greenhouse: []
+    lever: []
+    ashby: []
+  keywords_exclude: []

@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+data/jobauto.sqlite3
+data/profile.yaml
+data/generated/
+data/browser_profile/
+*.egg-info/
