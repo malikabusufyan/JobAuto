@@ -15,6 +15,9 @@ th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #eee; fon
 .status-interview { background: #ffe6b3; }
 .status-offer { background: #b3ffcc; }
 .status-rejected { background: #ffd0d0; }
+.plan-not_applied { background: #f0f0f0; }
+.plan-applied { background: #c9f0d0; }
+.plan-will_apply { background: #ffe6b3; }
 .filters { margin-bottom: 6px; }
 .filters a { margin-right: 12px; text-decoration: none; color: #555; font-size: 13px; }
 .filters a.active { font-weight: bold; color: #1a1a2e; }

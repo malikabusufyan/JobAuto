@@ -37,6 +37,12 @@ def cmd_search(args):
     result = run_search(profile, sources)
     print(f"Checked sources: {result['sources_run']}")
     print(f"Found {result['seen']} matching listings, {result['added']} new.")
+    if result.get("filtered_out_non_us"):
+        print(f"Filtered out {result['filtered_out_non_us']} non-US listings (set preferences.us_only: false to disable).")
+    if result.get("filtered_out_excluded"):
+        print(f"Filtered out {result['filtered_out_excluded']} listings matching preferences.keywords_exclude.")
+    if result.get("filtered_out_over_experience"):
+        print(f"Filtered out {result['filtered_out_over_experience']} listings requiring more experience than preferences.max_years_experience.")
     if result["errors"]:
         print("Errors:")
         for name, err in result["errors"].items():
@@ -61,13 +67,78 @@ def cmd_add_job(args):
 
 def cmd_list(args):
     db.init_db()
-    rows = db.list_jobs(status=args.status)
+    rows = db.list_jobs(status=args.status, max_years=args.max_years, posted_within_days=args.posted_within_days)
     try:
         for row in rows:
-            print(f"[{row['id']:>4}] {row['status']:<10} {row['title']} @ {row['company']} ({row['source']}) - {row['url']}")
+            years = f"~{row['estimated_min_years']}yr" if row["estimated_min_years"] is not None else "?yr"
+            print(f"[{row['id']:>4}] {row['status']:<10} {years:>6} {row['title']} @ {row['company']} ({row['source']}) - {row['url']}")
         print(f"\n{len(rows)} job(s).")
     except (BrokenPipeError, OSError):
         pass  # downstream reader (e.g. `| head`) closed the pipe early
+
+
+def cmd_backfill_experience(args):
+    db.init_db()
+    count = db.backfill_estimated_years()
+    print(f"Computed estimated years-of-experience for {count} job(s) that were missing it.")
+
+
+def cmd_prune_non_us(args):
+    from jobauto.sources.base import is_us_location
+
+    db.init_db()
+    removed = []
+    for row in db.list_jobs(status="new"):
+        if not is_us_location(row["location"], bool(row["remote"])):
+            removed.append(row)
+            db.delete_job(row["id"])
+    print(f"Removed {len(removed)} non-US job(s) with status 'new'.")
+    for row in removed[:30]:
+        print(f"  [{row['id']:>4}] {row['title']} @ {row['company']} - {row['location']}")
+    if len(removed) > 30:
+        print(f"  ... and {len(removed) - 30} more")
+
+
+def cmd_prune_excluded(args):
+    from jobauto.profile import load_profile
+    from jobauto.sources.base import excludes_keywords
+
+    db.init_db()
+    exclude = load_profile().get("preferences", {}).get("keywords_exclude", [])
+    if not exclude:
+        print("preferences.keywords_exclude is empty - nothing to prune.")
+        return
+    removed = []
+    for row in db.list_jobs(status="new"):
+        if excludes_keywords(row["title"], exclude):
+            removed.append(row)
+            db.delete_job(row["id"])
+    print(f"Removed {len(removed)} job(s) with status 'new' matching keywords_exclude {exclude}.")
+    for row in removed[:30]:
+        print(f"  [{row['id']:>4}] {row['title']} @ {row['company']}")
+    if len(removed) > 30:
+        print(f"  ... and {len(removed) - 30} more")
+
+
+def cmd_prune_over_experience(args):
+    from jobauto.profile import load_profile
+    from jobauto.sources.experience import matches_experience_range
+
+    db.init_db()
+    max_years = load_profile().get("preferences", {}).get("max_years_experience")
+    if max_years is None:
+        print("preferences.max_years_experience is not set - nothing to prune.")
+        return
+    removed = []
+    for row in db.list_jobs(status="new"):
+        if not matches_experience_range(row["title"], row["description"] or "", max_years):
+            removed.append(row)
+            db.delete_job(row["id"])
+    print(f"Removed {len(removed)} job(s) with status 'new' requiring more than {max_years} years of experience.")
+    for row in removed[:30]:
+        print(f"  [{row['id']:>4}] {row['title']} @ {row['company']}")
+    if len(removed) > 30:
+        print(f"  ... and {len(removed) - 30} more")
 
 
 def cmd_generate(args):
@@ -128,8 +199,27 @@ def main():
     p.add_argument("--description", default="")
     p.set_defaults(func=cmd_add_job)
 
+    sub.add_parser(
+        "prune-non-us", help="Remove already-stored 'new' jobs whose location isn't US (retroactive cleanup)"
+    ).set_defaults(func=cmd_prune_non_us)
+
+    sub.add_parser(
+        "prune-excluded", help="Remove already-stored 'new' jobs whose title matches preferences.keywords_exclude"
+    ).set_defaults(func=cmd_prune_excluded)
+
+    sub.add_parser(
+        "backfill-experience", help="Compute estimated years-of-experience for jobs stored before this feature existed"
+    ).set_defaults(func=cmd_backfill_experience)
+
+    sub.add_parser(
+        "prune-over-experience",
+        help="Remove already-stored 'new' jobs requiring more than preferences.max_years_experience (retroactive cleanup)",
+    ).set_defaults(func=cmd_prune_over_experience)
+
     p = sub.add_parser("list", help="List stored jobs")
     p.add_argument("--status", help="Filter by status (new, generated, ready, applied, ...)")
+    p.add_argument("--max-years", type=int, help="Only show jobs estimated to need at most this many years of experience (unknown-requirement jobs are still shown)")
+    p.add_argument("--posted-within-days", type=int, help="Only show jobs posted within this many days (e.g. 1, 7, 30)")
     p.set_defaults(func=cmd_list)
 
     p = sub.add_parser("generate", help="Generate a tailored resume + cover letter for a job")

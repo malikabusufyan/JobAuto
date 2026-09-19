@@ -107,6 +107,10 @@ python -m jobauto.cli search --sources greenhouse,lever,ashby,usajobs,adzuna,ind
 # List what's been found
 python -m jobauto.cli list
 
+# Only show jobs estimated to need 3 years of experience or less (unknown-requirement
+# jobs are still shown - see "Experience-level filtering" below)
+python -m jobauto.cli list --max-years 3
+
 # Generate tailored documents for a specific job (see its id from `list`)
 python -m jobauto.cli generate 12
 
@@ -117,6 +121,46 @@ python -m jobauto.cli apply 12
 python -m jobauto.cli serve
 # then open http://127.0.0.1:8787
 ```
+
+## US-only filtering
+
+Companies on Greenhouse/Lever/Ashby list every office's openings on the same board - a search
+against Figma or Palantir will surface London, Tel Aviv, Tokyo, Munich, etc. alongside US roles.
+`preferences.us_only` in `profile.yaml` (default `true`) filters those out for `greenhouse`,
+`lever`, `ashby`, and the experimental scrapers - `usajobs` and `adzuna` are already US-scoped at
+the API level and aren't affected by this setting. It's a location-text heuristic (checks for a
+US state, "United States"/"USA", a recognized US city, or a bare "Remote" with no other country
+mentioned; rejects on any recognized non-US country/city) - not a guarantee, since it can't cover
+every city name, but it removes the bulk of clearly-foreign listings. Set `us_only: false` to see
+everything again.
+
+If you already have jobs stored from before turning this on, clean them up with:
+
+```bash
+python -m jobauto.cli prune-non-us
+```
+
+This only removes jobs still at status `new` - anything you've already generated documents for
+or applied to is left alone.
+
+## Experience-level filtering
+
+Every stored job gets an `estimated_min_years` value computed from its description (things
+like "4+ years", "2-4 years of experience", "0-2 YOE", or falling back to titles like "Senior"/
+"Staff"/"Manager" when no explicit number is given). This is a **non-destructive filter, not a
+deletion** - unlike the US-location filter, free-text years-of-experience parsing is noisier
+(a stray "our team has 40 years of combined experience" can throw it off), so nothing gets
+permanently removed from the database over it. Instead:
+
+- `python -m jobauto.cli list --max-years 3` shows only jobs estimated at <=3 years, plus any
+  job where no requirement could be detected at all (so postings that just don't state a number
+  aren't hidden by mistake).
+- The web dashboard has the same "Max years of experience" filter box, and shows the estimate
+  in an "Est. Yrs" column so you can see why something did or didn't pass.
+- Jobs stored before this feature existed need one backfill: `python -m jobauto.cli backfill-experience`.
+
+Adjust or drop the filter anytime by changing the number or clearing the box - no data is lost
+either way.
 
 ## Job sources
 

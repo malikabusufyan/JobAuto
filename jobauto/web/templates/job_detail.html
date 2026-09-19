@@ -18,6 +18,16 @@
     </label>
   </form>
 
+  <form method="post" action="/job/{{ job['id'] }}/application-plan" class="inline-form">
+    <label>Applied?
+      <select name="application_plan" class="plan-{{ job['application_plan'] }}" onchange="this.form.submit()">
+        {% for p in application_plans %}
+        <option value="{{ p }}" {% if job['application_plan'] == p %}selected{% endif %}>{{ application_plan_labels[p] }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </form>
+
   <div class="actions">
     <form method="post" action="/job/{{ job['id'] }}/generate">
       <button type="submit">Generate tailored resume + cover letter</button>

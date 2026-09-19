@@ -14,7 +14,7 @@ personal:
   github: "https://github.com/janedoe"
   portfolio: ""
   work_authorization: "US Citizen"   # e.g. US Citizen, Green Card, H1B, Requires Sponsorship, OPT/CPT
-  willing_to_relocate: false
+  willing_to_relocate: true
   willing_to_sponsor_needed: false   # true if YOU need visa sponsorship
 
 summary: >
@@ -71,6 +71,8 @@ preferences:
     - "Austin, TX"
   remote_ok: true
   min_salary: 120000
+  us_only: true   # filters out non-US office locations from Greenhouse/Lever/Ashby/scraper results
+  max_years_experience: 3   # skip postings that ask for more years than this (title + description heuristic)
   target_companies:
     # Company "board tokens"/slugs used to query Greenhouse/Lever/Ashby directly.
     # Find them by opening a company's careers page and checking the URL:

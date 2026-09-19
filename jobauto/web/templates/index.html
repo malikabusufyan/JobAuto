@@ -28,18 +28,49 @@
 
 <section class="panel">
   <h2>Jobs ({{ jobs|length }})</h2>
+  {% set qs = "max_years=" + active_max_years + "&application_plan=" + active_application_plan + "&posted_within=" + active_posted_within %}
   <div class="filters">
-    <a href="/" class="{% if not active_status %}active{% endif %}">all</a>
+    <a href="/?{{ qs }}" class="{% if not active_status %}active{% endif %}">all</a>
     {% for s in statuses %}
-      <a href="/?status={{ s }}" class="{% if active_status == s %}active{% endif %}">{{ s }}</a>
+      <a href="/?status={{ s }}&{{ qs }}" class="{% if active_status == s %}active{% endif %}">{{ s }}</a>
     {% endfor %}
   </div>
+  <div class="filters">
+    <a href="/?status={{ active_status }}&max_years={{ active_max_years }}&posted_within={{ active_posted_within }}" class="{% if not active_application_plan %}active{% endif %}">all (applied?)</a>
+    {% for p in application_plans %}
+      <a href="/?status={{ active_status }}&max_years={{ active_max_years }}&posted_within={{ active_posted_within }}&application_plan={{ p }}" class="{% if active_application_plan == p %}active{% endif %}">{{ application_plan_labels[p] }}</a>
+    {% endfor %}
+  </div>
+  <div class="filters">
+    <a href="/?status={{ active_status }}&max_years={{ active_max_years }}&application_plan={{ active_application_plan }}" class="{% if not active_posted_within %}active{% endif %}">all (posted)</a>
+    {% for d in posted_within_options %}
+      <a href="/?status={{ active_status }}&max_years={{ active_max_years }}&application_plan={{ active_application_plan }}&posted_within={{ d }}" class="{% if active_posted_within == d %}active{% endif %}">{{ posted_within_labels[d] }}</a>
+    {% endfor %}
+  </div>
+  <form method="get" action="/" class="checkbox-grid" style="margin-bottom:14px">
+    <input type="hidden" name="status" value="{{ active_status }}">
+    <input type="hidden" name="application_plan" value="{{ active_application_plan }}">
+    <input type="hidden" name="posted_within" value="{{ active_posted_within }}">
+    <label>Max years of experience: <input type="number" name="max_years" min="0" placeholder="e.g. 3" value="{{ active_max_years }}" style="width:70px"></label>
+    <button type="submit">Filter</button>
+    {% if active_max_years %}<a href="/?status={{ active_status }}&application_plan={{ active_application_plan }}&posted_within={{ active_posted_within }}">clear</a>{% endif %}
+  </form>
   <table>
-    <thead><tr><th>Status</th><th>Title</th><th>Company</th><th>Location</th><th>Source</th><th></th></tr></thead>
+    <thead><tr><th>Status</th><th>Applied?</th><th>Est. Yrs</th><th>Title</th><th>Company</th><th>Location</th><th>Source</th><th></th></tr></thead>
     <tbody>
       {% for job in jobs %}
       <tr>
         <td><span class="badge status-{{ job['status'] }}">{{ job['status'] }}</span></td>
+        <td>
+          <form method="post" action="/job/{{ job['id'] }}/application-plan" class="inline-form">
+            <select name="application_plan" class="plan-{{ job['application_plan'] }}" onchange="this.form.submit()">
+              {% for p in application_plans %}
+              <option value="{{ p }}" {% if job['application_plan'] == p %}selected{% endif %}>{{ application_plan_labels[p] }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </td>
+        <td>{{ job['estimated_min_years'] if job['estimated_min_years'] is not none else '?' }}</td>
         <td><a href="/job/{{ job['id'] }}">{{ job['title'] }}</a></td>
         <td>{{ job['company'] }}</td>
         <td>{{ job['location'] }}</td>
